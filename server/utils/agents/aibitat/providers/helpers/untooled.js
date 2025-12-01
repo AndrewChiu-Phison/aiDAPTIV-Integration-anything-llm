@@ -11,15 +11,29 @@ class UnTooled {
 
   cleanMsgs(messages) {
     const modifiedMessages = [];
+    let systemPrompt = "";
+    messages.forEach((msg) => {
+      if (msg.role === "system") {
+        systemPrompt = msg.content;
+      }
+    });
     messages.forEach((msg) => {
       if (msg.role === "function") {
-        const prevMsg = modifiedMessages[modifiedMessages.length - 1].content;
-        modifiedMessages[modifiedMessages.length - 1].content =
-          `${prevMsg}\n${msg.content}`;
-        return;
+        // const prevMsg = modifiedMessages[modifiedMessages.length - 1].content;
+        // modifiedMessages[modifiedMessages.length - 1].content =
+        //   `${prevMsg}\n${msg.content}`;
+        // return;
+        const tmpMsg = {
+          content: msg.content + "\n" + systemPrompt,
+          role: "system",
+        };
+        modifiedMessages.push(tmpMsg);
       }
-      modifiedMessages.push(msg);
+      else{
+        modifiedMessages.push(msg);
+      }
     });
+    this.providerLog(`modifiedMessages: ${JSON.stringify(modifiedMessages)}`);
     return modifiedMessages;
   }
 
@@ -297,6 +311,7 @@ ${JSON.stringify(def.parameters.properties, null, 4)}\n`;
         );
         const msgUUID = v4();
         completion = { content: "" };
+        this.providerLog(`Messages: ${JSON.stringify(messages)}`);
         const stream = await chatCallback({
           messages: this.cleanMsgs(messages),
         });
@@ -304,6 +319,7 @@ ${JSON.stringify(def.parameters.properties, null, 4)}\n`;
         for await (const chunk of stream) {
           if (!chunk?.choices?.[0]) continue; // Skip if no choices
           const choice = chunk.choices[0];
+          this.providerLog(`Choice: ${JSON.stringify(choice)}`);
           if (choice.delta?.content) {
             completion.content += choice.delta.content;
             eventHandler?.("reportStreamEvent", {

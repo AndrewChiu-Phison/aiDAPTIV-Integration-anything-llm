@@ -143,7 +143,7 @@ class OpenAiLLM {
     return temperature;
   }
 
-  async getChatCompletion(messages = null, { temperature = 0.7 }) {
+  async getChatCompletion(messages = null, { temperature = 0.7, max_tokens = 4096 }) {
     if (!(await this.isValidChatCompletionModel(this.model)))
       throw new Error(
         `OpenAI chat: ${this.model} is not valid for chat completion!`
@@ -156,6 +156,7 @@ class OpenAiLLM {
           input: messages,
           store: false,
           temperature: this.#temperature(this.model, temperature),
+          max_tokens: max_tokens,
         })
         .catch((e) => {
           throw new Error(e.message);
@@ -179,7 +180,7 @@ class OpenAiLLM {
     };
   }
 
-  async streamGetChatCompletion(messages = null, { temperature = 0.7 }) {
+  async streamGetChatCompletion(messages = null, { temperature = 0.7, max_tokens = 4096 }) {
     if (!(await this.isValidChatCompletionModel(this.model)))
       throw new Error(
         `OpenAI chat: ${this.model} is not valid for chat completion!`
@@ -192,6 +193,7 @@ class OpenAiLLM {
         input: messages,
         store: false,
         temperature: this.#temperature(this.model, temperature),
+        max_tokens: max_tokens,
       }),
       messages,
       false

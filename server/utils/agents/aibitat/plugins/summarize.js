@@ -106,6 +106,9 @@ const docSummarizer = {
                 await this.listDocuments(),
                 []
               );
+              this.super.introspect(
+                `${this.caller}: availableDocs ${JSON.stringify(availableDocs)}`
+              );
               if (!availableDocs.length) {
                 this.super.handlerProps.log(
                   `${this.caller}: No available documents to summarize.`
@@ -114,7 +117,7 @@ const docSummarizer = {
               }
 
               const docInfo = availableDocs.find(
-                (info) => info.filename === filename
+                (info) => info.filename.split(".")[0] === filename
               );
               if (!docInfo) {
                 this.super.handlerProps.log(
@@ -136,12 +139,16 @@ const docSummarizer = {
                 );
               }
 
+              this.super.introspect(
+                `${this.caller}: document.content ${JSON.stringify(document.content)}`
+              );
+              this.super.introspect(
+                `${this.caller}: document.content length ${document.content.length}`
+              );
+
               const { TokenManager } = require("../../../helpers/tiktoken");
-              if (
-                new TokenManager(this.super.model).countFromString(
-                  document.content
-                ) < Provider.contextLimit(this.super.provider, this.super.model)
-              ) {
+              // Make the return document.content always return the full content of the document.
+              if (true) {
                 return document.content;
               }
 

@@ -147,13 +147,13 @@ class AnthropicLLM {
     ];
   }
 
-  async getChatCompletion(messages = null, { temperature = 0.7 }) {
+  async getChatCompletion(messages = null, { temperature = 0.7, max_tokens = 4096 }) {
     try {
       const systemContent = messages[0].content;
       const result = await LLMPerformanceMonitor.measureAsyncFunction(
         this.anthropic.messages.create({
           model: this.model,
-          max_tokens: 4096,
+          max_tokens: max_tokens,
           system: this.#buildSystemPrompt(systemContent),
           messages: messages.slice(1), // Pop off the system message
           temperature: Number(temperature ?? this.defaultTemp),
@@ -179,12 +179,12 @@ class AnthropicLLM {
     }
   }
 
-  async streamGetChatCompletion(messages = null, { temperature = 0.7 }) {
+  async streamGetChatCompletion(messages = null, { temperature = 0.7, max_tokens = 4096 }) {
     const systemContent = messages[0].content;
     const measuredStreamRequest = await LLMPerformanceMonitor.measureStream(
       this.anthropic.messages.stream({
         model: this.model,
-        max_tokens: 4096,
+        max_tokens: max_tokens,
         system: this.#buildSystemPrompt(systemContent),
         messages: messages.slice(1), // Pop off the system message
         temperature: Number(temperature ?? this.defaultTemp),

@@ -2,6 +2,7 @@ const { loadSummarizationChain } = require("langchain/chains");
 const { PromptTemplate } = require("@langchain/core/prompts");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 const Provider = require("../providers/ai-provider");
+const { getBaseLLMProviderModel } = require("../../../helpers");
 /**
  * @typedef {Object} LCSummarizationConfig
  * @property {string} provider The LLM to use for summarization (inherited)
@@ -15,15 +16,47 @@ const Provider = require("../providers/ai-provider");
  * @param {LCSummarizationConfig} The LLM to use for summarization (inherited)
  * @returns {Promise<string>} The summarized content.
  */
+async function resolveLLMConfig({ provider, model }) {
+  let resolvedProvider = provider ?? process.env.LLM_PROVIDER ?? "openai";
+  let resolvedModel =
+    model ?? getBaseLLMProviderModel({ provider: resolvedProvider }) ?? null;
+
+  const missingOpenAiKey =
+    resolvedProvider === "openai" && !process.env.OPEN_AI_KEY;
+  const genericEndpointConfigured =
+    !!process.env.GENERIC_OPEN_AI_BASE_PATH &&
+    !!process.env.GENERIC_OPEN_AI_API_KEY;
+
+  if (missingOpenAiKey && genericEndpointConfigured) {
+    resolvedProvider = "generic-openai";
+    resolvedModel =
+      model ??
+      getBaseLLMProviderModel({ provider: "generic-openai" }) ??
+      process.env.GENERIC_OPEN_AI_MODEL_PREF ??
+      resolvedModel;
+  }
+
+  if (!resolvedModel) {
+    throw new Error(
+      `No model configured for ${resolvedProvider}. Please review your LLM settings.`
+    );
+  }
+
+  return { provider: resolvedProvider, model: resolvedModel };
+}
+
 async function summarizeContent({
-  provider = "openai",
+  provider = null,
   model = null,
   controllerSignal,
   content,
 }) {
-  const llm = Provider.LangChainChatModel(provider, {
+  const { provider: resolvedProvider, model: resolvedModel } =
+    await resolveLLMConfig({ provider, model });
+
+  const llm = Provider.LangChainChatModel(resolvedProvider, {
     temperature: 0,
-    model: model,
+    model: resolvedModel,
   });
 
   const textSplitter = new RecursiveCharacterTextSplitter({

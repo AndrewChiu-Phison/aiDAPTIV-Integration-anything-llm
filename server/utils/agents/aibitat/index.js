@@ -609,6 +609,9 @@ ${this.getHistory({ to: route.to })
         functions,
         route.from
       );
+      this.handlerProps.log?.(
+        `[DEBUG] reply_content: ${JSON.stringify(content, null, 2)}`
+      );
     } else {
       this.handlerProps.log?.(
         "[DEBUG] Provider does not support agent streaming - will use synchronous execution!"
@@ -711,13 +714,13 @@ ${this.getHistory({ to: route.to })
       return await this.handleAsyncExecution(
         provider,
         [
-          ...messages,
           {
             name,
             role: "function",
             content: result,
             originalFunctionCall: completionStream.functionCall,
           },
+          ...messages,
         ],
         functions,
         byAgent

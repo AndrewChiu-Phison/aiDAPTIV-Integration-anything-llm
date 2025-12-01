@@ -164,14 +164,14 @@ class GenericOpenAiLLM {
     return textResponse;
   }
 
-  async getChatCompletion(messages = null, { temperature = 0.7 }) {
+  async getChatCompletion(messages = null, { temperature = 0.7, max_tokens = null }) {
     const result = await LLMPerformanceMonitor.measureAsyncFunction(
       this.openai.chat.completions
         .create({
           model: this.model,
           messages,
           temperature,
-          max_tokens: this.maxTokens,
+          max_tokens: max_tokens === null ? this.maxTokens : max_tokens,
         })
         .catch((e) => {
           throw new Error(e.message);

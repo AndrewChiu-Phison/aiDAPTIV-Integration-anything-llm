@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
-const { getVectorDbClass } = require("../utils/helpers");
+const { getVectorDbClass, getLLMProvider } = require("../utils/helpers");
 const prisma = require("../utils/prisma");
 const { Telemetry } = require("./telemetry");
 const { EventLogs } = require("./eventLogs");
@@ -83,12 +83,15 @@ const Document = {
   addDocuments: async function (workspace, additions = [], userId = null) {
     const VectorDb = getVectorDbClass();
     if (additions.length === 0) return { failed: [], embedded: [] };
-    const { fileData } = require("../utils/files");
+    const { fileData, cachedVectorInformation } = require("../utils/files");
     const embedded = [];
     const failedToEmbed = [];
     const errors = new Set();
+    const cachedDocPaths = new Map();
 
     for (const path of additions) {
+      const isCached = await cachedVectorInformation(path, true);
+      cachedDocPaths.set(path, isCached);
       const data = await fileData(path);
       if (!data) continue;
 
@@ -141,6 +144,15 @@ const Document = {
       },
       userId
     );
+    // only non-cached documents should be processed
+    const nonCachedDocuments = embedded.filter(
+      (doc) => !cachedDocPaths.get(doc)
+    );
+    console.log("nonCachedDocuments", nonCachedDocuments);
+    await runPostEmbedLLMRequest({
+      workspace,
+      embeddedDocs: nonCachedDocuments,
+    });
     return { failedToEmbed, errors: Array.from(errors), embedded };
   },
 
@@ -303,5 +315,51 @@ const Document = {
     },
   },
 };
+
+async function runPostEmbedLLMRequest({ workspace = null, embeddedDocs = [] }) {
+  if (!workspace) return;
+
+  for (const doc of embeddedDocs) {
+    // get the content of the document
+    const sanitizedHistory = [
+      {
+        "content": (await Document.contentByDocPath(doc)).content,
+        "role": "system",
+      }
+    ];
+
+    sanitizedHistory.push({
+      content: "1+1=?",
+      role: "user",
+    });
+    console.log("sanitizedHistory", JSON.stringify(sanitizedHistory, null, 2));
+
+    try {
+      console.log("workspace?.chatProvider", workspace?.chatProvider);
+      console.log("workspace?.chatModel", workspace?.chatModel);
+      const LLMConnector = getLLMProvider({
+        provider: workspace?.chatProvider,
+        model: workspace?.chatModel,
+      });
+      const { textResponse } = await LLMConnector.getChatCompletion(
+        sanitizedHistory,
+        {
+          temperature:
+            workspace?.openAiTemp ?? LLMConnector?.defaultTemp ?? 0.7,
+          max_tokens: 10,
+        }
+      );
+      console.log(
+        "[Document.addDocuments] Post-embed LLM response:",
+        textResponse || "No response"
+      );
+    } catch (error) {
+      console.error(
+        "[Document.addDocuments] Failed to call post-embed LLM:",
+        error.message
+      );
+    }
+  }
+}
 
 module.exports = { Document };
