@@ -1,7 +1,7 @@
-# Chat with YouTube Videos User Guide
+# AnyThingLLM User Guide
 
 ## Overview
-This application allows users to store video content in the KV Cache, enabling them to select specific videos for QA interactions. This functionality achieves quick responses from the LLM, enhancing the overall user experience.
+This application allows users to ask questions from the text user provided. This functionality achieves quick responses from the LLM, enhancing the overall user experience.
 
 ---
 ## Chapter 1: Installation and Setting
