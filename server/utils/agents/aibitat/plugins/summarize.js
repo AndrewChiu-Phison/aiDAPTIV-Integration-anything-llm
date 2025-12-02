@@ -117,7 +117,7 @@ const docSummarizer = {
               }
 
               const docInfo = availableDocs.find(
-                (info) => info.filename.split(".")[0] === filename
+                (info) => info.filename.split(".")[0] === filename.split(".")[0]
               );
               if (!docInfo) {
                 this.super.handlerProps.log(
