@@ -11,7 +11,10 @@ This application allows users to ask questions from the text user provided. This
 ```bash
 git clone <repository-url>
 cd aiDAPTIV-Integration-anything-llm
+npm install -g yarn
+yarn setup
 ```
+
 ```bash
 yarn dev:all
 ```
