@@ -91,77 +91,221 @@ if %NEED_SETUP%==0 (
     
     echo.
     echo yarn setup completed successfully!
+)
 
+echo.
+echo ================================
+echo  Setting up Prisma...
+echo ================================
+echo.
+
+:: Check if server directory exists
+if not exist "server" (
+    echo [Error] server directory does not exist!
     echo.
-    echo ================================
-    echo  Running Prisma setup commands...
-    echo ================================
-    echo.
+    pause
+    exit /b 1
+)
 
-    :: Set environment variable to disable TLS certificate validation
-    set NODE_TLS_REJECT_UNAUTHORIZED=0
-
-    :: Generate Prisma client
-    echo Executing: yarn prisma:generate
-    yarn prisma:generate
-    if %ERRORLEVEL% NEQ 0 (
-        echo.
-        echo [Error] Failed to execute "yarn prisma:generate". Please check the error messages.
-        echo.
-        pause
-        exit /b 1
-    )
-
-    :: Check if database file exists
-    echo.
-    echo Checking database file...
-    if exist "server\storage\anythingllm.db" (
-        echo Database file exists
-    ) else (
-        echo Database file does not exist
-    )
-
-    :: Check Prisma migrate status
-    echo.
-    echo Checking Prisma migrate status...
+:: Check if server node_modules exists
+if not exist "server\node_modules" (
+    echo [Warning] server\node_modules does not exist. Prisma may not be installed.
+    echo Installing Prisma packages in server...
     cd server
-    npx prisma migrate status
+    yarn add prisma @prisma/client --dev
     if %ERRORLEVEL% NEQ 0 (
         echo.
-        echo [Warning] Prisma migrate status check returned an error.
-    )
-    cd ..
-
-    :: Deploy Prisma migrations
-    echo.
-    echo Deploying Prisma migrations...
-    cd server
-    npx prisma migrate deploy
-    if %ERRORLEVEL% NEQ 0 (
-        echo.
-        echo [Error] Failed to execute "npx prisma migrate deploy". Please check the error messages.
+        echo [Error] Failed to install Prisma packages. Please check the error messages.
         echo.
         cd ..
         pause
         exit /b 1
     )
+    echo Prisma packages installed successfully.
     cd ..
+) else (
+    echo server\node_modules exists, checking Prisma installation...
+)
 
-    :: Check Prisma migrate status again
-    echo.
-    echo Checking Prisma migrate status again...
-    cd server
-    npx prisma migrate status
+:: Ensure Prisma is available (check via npx prisma -v)
+echo.
+echo Checking Prisma CLI...
+cd server
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to change to server directory!
+    pause
+    exit /b 1
+)
+
+:: Check if Prisma is installed by checking for prisma binary
+if exist "node_modules\.bin\prisma.cmd" (
+    echo Prisma binary found, checking version...
+    call npx prisma -v
     if %ERRORLEVEL% NEQ 0 (
         echo.
-        echo [Warning] Prisma migrate status check returned an error.
+        echo Prisma CLI not working. Re-installing Prisma packages in server...
+        echo This may take a few minutes...
+        :: Try to (re)install prisma and @prisma/client as dev dependencies
+        yarn add prisma @prisma/client --dev
+        if %ERRORLEVEL% NEQ 0 (
+            echo.
+            echo [Error] Failed to install Prisma packages. Please check the error messages.
+            echo.
+            cd ..
+            pause
+            exit /b 1
+        )
+        echo Prisma packages installed successfully.
+        echo Verifying Prisma installation...
+        call npx prisma -v
+        if %ERRORLEVEL% NEQ 0 (
+            echo.
+            echo [Error] Prisma CLI still not working after reinstall. Please check manually.
+            echo.
+            cd ..
+            pause
+            exit /b 1
+        )
+    ) else (
+        echo Prisma CLI is available.
     )
-    cd ..
+) else (
+    echo Prisma binary not found. Installing Prisma packages...
+    yarn add prisma @prisma/client --dev
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo [Error] Failed to install Prisma packages. Please check the error messages.
+        echo.
+        cd ..
+        pause
+        exit /b 1
+    )
+    echo Prisma packages installed successfully.
+    echo Verifying Prisma installation...
+    call npx prisma -v
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo [Error] Prisma CLI still not working after install. Please check manually.
+        echo.
+        cd ..
+        pause
+        exit /b 1
+    )
+)
 
+cd ..
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to return to project root directory!
+    pause
+    exit /b 1
+)
+echo.
+echo Continuing with Prisma setup...
+
+:: Set environment variable to disable TLS certificate validation
+set NODE_TLS_REJECT_UNAUTHORIZED=0
+
+:: Generate Prisma client
+echo Executing: yarn prisma:generate
+call yarn prisma:generate
+set PRISMA_GEN_RESULT=%ERRORLEVEL%
+if !PRISMA_GEN_RESULT! NEQ 0 (
     echo.
-    echo Prisma setup completed successfully!
+    echo [Warning] Failed to execute "yarn prisma:generate". Trying to reinstall Prisma and retry...
+    echo.
+    cd server
+    call yarn add prisma @prisma/client --dev
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo [Error] Failed to install Prisma packages during retry. Please check the error messages.
+        echo.
+        cd ..
+        pause
+        exit /b 1
+    )
+    echo Re-running yarn prisma:generate after reinstall...
+    cd ..
+    call yarn prisma:generate
+    set PRISMA_GEN_RETRY=%ERRORLEVEL%
+    if !PRISMA_GEN_RETRY! NEQ 0 (
+        echo.
+        echo [Error] \"yarn prisma:generate\" still failing after reinstall. Please check manually.
+        echo.
+        pause
+        exit /b 1
+    )
+) else (
+    echo yarn prisma:generate completed successfully.
+)
+
+:: Check if database file exists
+echo.
+echo Checking database file...
+if exist "server\storage\anythingllm.db" (
+    echo Database file exists
+) else (
+    echo Database file does not exist
+)
+
+:: Check migration status
+echo.
+echo Checking Prisma migration status...
+cd server
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to change to server directory!
+    pause
+    exit /b 1
+)
+call npx prisma migrate status
+cd ..
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to return to project root directory!
+    pause
+    exit /b 1
+)
+
+:: Deploy migrations
+echo.
+echo Deploying Prisma migrations...
+cd server
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to change to server directory!
+    pause
+    exit /b 1
+)
+call npx prisma migrate deploy
+set MIGRATE_DEPLOY_RESULT=%ERRORLEVEL%
+if !MIGRATE_DEPLOY_RESULT! NEQ 0 (
+    echo.
+    echo [Warning] Failed to execute "npx prisma migrate deploy". Continuing anyway...
     echo.
 )
+cd ..
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to return to project root directory!
+    pause
+    exit /b 1
+)
+
+:: Check migration status again
+echo.
+echo Checking Prisma migration status after deploy...
+cd server
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to change to server directory!
+    pause
+    exit /b 1
+)
+call npx prisma migrate status
+cd ..
+if %ERRORLEVEL% NEQ 0 (
+    echo [Error] Failed to return to project root directory!
+    pause
+    exit /b 1
+)
+
+echo.
+echo Prisma setup completed successfully!
 
 echo.
 echo ================================
