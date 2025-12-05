@@ -6,14 +6,14 @@ cd /d "%~dp0..\..\"
 
 echo.
 echo ================================
-echo  Checking if npm is installed...
+echo  Checking if Node.js is installed...
 echo ================================
 echo.
 
-:: Check if npm command exists
-call where npm >nul 2>nul
+:: Check if Node.js is installed first (npm comes with Node.js)
+call where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo npm is not installed, attempting to install Node.js and npm...
+    echo Node.js is not installed, attempting to install Node.js (npm will be installed automatically)...
     echo.
     
     :: Try to install using winget (Windows Package Manager)
@@ -24,6 +24,7 @@ if %ERRORLEVEL% NEQ 0 (
         if %ERRORLEVEL% EQU 0 (
             echo.
             echo Node.js installed successfully via winget!
+            echo npm has been installed automatically with Node.js.
             echo Please restart this batch file after installation completes.
             echo.
             pause
@@ -43,6 +44,7 @@ if %ERRORLEVEL% NEQ 0 (
         if %ERRORLEVEL% EQU 0 (
             echo.
             echo Node.js installed successfully via Chocolatey!
+            echo npm has been installed automatically with Node.js.
             echo Please restart this batch file after installation completes.
             echo.
             pause
@@ -56,9 +58,9 @@ if %ERRORLEVEL% NEQ 0 (
     
     :: If both methods failed, provide manual installation instructions
     echo.
-    echo [Error] Could not automatically install Node.js and npm.
+    echo [Error] Could not automatically install Node.js.
     echo.
-    echo Please install Node.js manually:
+    echo Please install Node.js manually (npm will be installed automatically with Node.js):
     echo 1. Download Node.js from: https://nodejs.org/
     echo 2. Run the installer and follow the instructions
     echo 3. Restart this batch file after installation
@@ -66,6 +68,29 @@ if %ERRORLEVEL% NEQ 0 (
     echo Alternatively, you can install a package manager:
     echo - winget: Usually pre-installed on Windows 10/11
     echo - Chocolatey: https://chocolatey.org/install
+    echo.
+    pause
+    exit /b 1
+) else (
+    echo Node.js detected, checking version...
+    for /f "delims=" %%v in ('node --version 2^>nul') do (
+        echo %%v
+    )
+    echo.
+)
+
+echo.
+echo ================================
+echo  Checking if npm is installed...
+echo ================================
+echo.
+
+:: Check if npm command exists (npm should be installed with Node.js)
+call where npm >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [Error] npm not found even though Node.js is installed.
+    echo This is unusual. Please reinstall Node.js from https://nodejs.org/
     echo.
     pause
     exit /b 1
