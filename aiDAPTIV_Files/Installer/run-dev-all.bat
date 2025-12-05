@@ -6,15 +6,88 @@ cd /d "%~dp0..\..\"
 
 echo.
 echo ================================
+echo  Checking if npm is installed...
+echo ================================
+echo.
+
+:: Check if npm command exists
+call where npm >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo npm is not installed, attempting to install Node.js and npm...
+    echo.
+    
+    :: Try to install using winget (Windows Package Manager)
+    call where winget >nul 2>nul
+    if %ERRORLEVEL% EQU 0 (
+        echo Using winget to install Node.js...
+        call winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
+        if %ERRORLEVEL% EQU 0 (
+            echo.
+            echo Node.js installed successfully via winget!
+            echo Please restart this batch file after installation completes.
+            echo.
+            pause
+            exit /b 0
+        ) else (
+            echo.
+            echo [Warning] Failed to install Node.js via winget. Trying alternative method...
+            echo.
+        )
+    )
+    
+    :: Try to install using Chocolatey if available
+    call where choco >nul 2>nul
+    if %ERRORLEVEL% EQU 0 (
+        echo Using Chocolatey to install Node.js...
+        call choco install nodejs-lts -y
+        if %ERRORLEVEL% EQU 0 (
+            echo.
+            echo Node.js installed successfully via Chocolatey!
+            echo Please restart this batch file after installation completes.
+            echo.
+            pause
+            exit /b 0
+        ) else (
+            echo.
+            echo [Warning] Failed to install Node.js via Chocolatey.
+            echo.
+        )
+    )
+    
+    :: If both methods failed, provide manual installation instructions
+    echo.
+    echo [Error] Could not automatically install Node.js and npm.
+    echo.
+    echo Please install Node.js manually:
+    echo 1. Download Node.js from: https://nodejs.org/
+    echo 2. Run the installer and follow the instructions
+    echo 3. Restart this batch file after installation
+    echo.
+    echo Alternatively, you can install a package manager:
+    echo - winget: Usually pre-installed on Windows 10/11
+    echo - Chocolatey: https://chocolatey.org/install
+    echo.
+    pause
+    exit /b 1
+) else (
+    echo npm detected, checking version...
+    for /f "delims=" %%v in ('npm --version 2^>nul') do (
+        echo %%v
+    )
+    echo.
+)
+
+echo.
+echo ================================
 echo  Checking if yarn is installed...
 echo ================================
 echo.
 
 :: Check if yarn command exists
-where yarn >nul 2>nul
+call where yarn >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     echo yarn is not installed, attempting to install yarn globally using npm...
-    where npm >nul 2>nul
+    call where npm >nul 2>nul
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo [Error] npm not found on this computer. Please install Node.js and npm before running this batch file.
@@ -25,7 +98,7 @@ if %ERRORLEVEL% NEQ 0 (
     )
 
     echo Executing: npm install -g yarn
-    npm install -g yarn
+    call npm install -g yarn
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo [Error] Failed to install yarn. Please check your network connection or permissions and try again.
