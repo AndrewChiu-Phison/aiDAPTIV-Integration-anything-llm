@@ -26,7 +26,7 @@ yarn dev:all
 ### Usage Workflow
 
 1. **Initial Setup**
-- Click on `anything-llm.exe` to launch the chat interface. The chat room can be found at http://localhost:3000 (default). 
+- Click on `run-dev-all.bat` to launch the chat interface.(If occurs error, maybe try once again) The chat room can be found at http://localhost:3000 (default). 
 ![image](img/fig_1.PNG)
 
 2. **Set LLM Endpoint**
