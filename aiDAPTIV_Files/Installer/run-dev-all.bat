@@ -112,7 +112,7 @@ if not exist "server\node_modules" (
     echo [Warning] server\node_modules does not exist. Prisma may not be installed.
     echo Installing Prisma packages in server...
     cd server
-    yarn add prisma @prisma/client --dev
+    call yarn add prisma @prisma/client --dev
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo [Error] Failed to install Prisma packages. Please check the error messages.
@@ -136,6 +136,9 @@ if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b 1
 )
+
+:: Set environment variable to disable TLS certificate validation
+set NODE_TLS_REJECT_UNAUTHORIZED=0
 
 :: Check if Prisma is installed by checking for prisma binary
 if exist "node_modules\.bin\prisma.cmd" (
@@ -201,9 +204,6 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo.
 echo Continuing with Prisma setup...
-
-:: Set environment variable to disable TLS certificate validation
-set NODE_TLS_REJECT_UNAUTHORIZED=0
 
 :: Generate Prisma client
 echo Executing: yarn prisma:generate
