@@ -12,16 +12,16 @@ echo.
 
 :: Check if Node.js is installed first (npm comes with Node.js)
 call where node >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
-    echo Node.js is not installed, attempting to install Node.js (npm will be installed automatically)...
+if errorlevel 1 (
+    echo Node.js is not installed, attempting to install Node.js ^(npm will be installed automatically^)...
     echo.
     
     :: Try to install using winget (Windows Package Manager)
     call where winget >nul 2>nul
-    if %ERRORLEVEL% EQU 0 (
+    if not errorlevel 1 (
         echo Using winget to install Node.js...
         call winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
-        if %ERRORLEVEL% EQU 0 (
+        if not errorlevel 1 (
             echo.
             echo Node.js installed successfully via winget!
             echo npm has been installed automatically with Node.js.
@@ -38,10 +38,10 @@ if %ERRORLEVEL% NEQ 0 (
     
     :: Try to install using Chocolatey if available
     call where choco >nul 2>nul
-    if %ERRORLEVEL% EQU 0 (
+    if not errorlevel 1 (
         echo Using Chocolatey to install Node.js...
         call choco install nodejs-lts -y
-        if %ERRORLEVEL% EQU 0 (
+        if not errorlevel 1 (
             echo.
             echo Node.js installed successfully via Chocolatey!
             echo npm has been installed automatically with Node.js.
@@ -60,7 +60,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [Error] Could not automatically install Node.js.
     echo.
-    echo Please install Node.js manually (npm will be installed automatically with Node.js):
+    echo Please install Node.js manually ^(npm will be installed automatically with Node.js^):
     echo 1. Download Node.js from: https://nodejs.org/
     echo 2. Run the installer and follow the instructions
     echo 3. Restart this batch file after installation
@@ -87,7 +87,7 @@ echo.
 
 :: Check if npm command exists (npm should be installed with Node.js)
 call where npm >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
+if errorlevel 1 (
     echo.
     echo [Error] npm not found even though Node.js is installed.
     echo This is unusual. Please reinstall Node.js from https://nodejs.org/
@@ -110,10 +110,10 @@ echo.
 
 :: Check if yarn command exists
 call where yarn >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
+if errorlevel 1 (
     echo yarn is not installed, attempting to install yarn globally using npm...
     call where npm >nul 2>nul
-    if %ERRORLEVEL% NEQ 0 (
+    if errorlevel 1 (
         echo.
         echo [Error] npm not found on this computer. Please install Node.js and npm before running this batch file.
         echo Download link: https://nodejs.org/
@@ -124,7 +124,7 @@ if %ERRORLEVEL% NEQ 0 (
 
     echo Executing: npm install -g yarn
     call npm install -g yarn
-    if %ERRORLEVEL% NEQ 0 (
+    if errorlevel 1 (
         echo.
         echo [Error] Failed to install yarn. Please check your network connection or permissions and try again.
         echo.
