@@ -68,6 +68,9 @@ if not exist "frontend\node_modules" (
     echo [Check] frontend\node_modules exists
 )
 
+:: Set environment variable to disable TLS certificate validation
+set NODE_TLS_REJECT_UNAUTHORIZED=0
+
 if %NEED_SETUP%==0 (
     echo.
     echo All required node_modules directories exist. yarn setup has been executed, skipping this step.
@@ -136,9 +139,6 @@ if %ERRORLEVEL% NEQ 0 (
     pause
     exit /b 1
 )
-
-:: Set environment variable to disable TLS certificate validation
-set NODE_TLS_REJECT_UNAUTHORIZED=0
 
 :: Check if Prisma is installed by checking for prisma binary
 if exist "node_modules\.bin\prisma.cmd" (
