@@ -25,10 +25,7 @@ if errorlevel 1 (
             echo.
             echo Node.js installed successfully via winget!
             echo npm has been installed automatically with Node.js.
-            echo Please restart this batch file after installation completes.
             echo.
-            pause
-            exit /b 0
         ) else (
             echo.
             echo [Warning] Failed to install Node.js via winget. Trying alternative method...
@@ -45,10 +42,7 @@ if errorlevel 1 (
             echo.
             echo Node.js installed successfully via Chocolatey!
             echo npm has been installed automatically with Node.js.
-            echo Please restart this batch file after installation completes.
             echo.
-            pause
-            exit /b 0
         ) else (
             echo.
             echo [Warning] Failed to install Node.js via Chocolatey.
