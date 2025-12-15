@@ -175,7 +175,7 @@ if %NEED_SETUP%==0 (
     echo ================================
     echo.
 
-    yarn setup
+    call yarn setup
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo [Error] Failed to execute "yarn setup". Please check the error messages.
@@ -239,7 +239,7 @@ if exist "node_modules\.bin\prisma.cmd" (
         echo Prisma CLI not working. Re-installing Prisma packages in server...
         echo This may take a few minutes...
         :: Try to (re)install prisma and @prisma/client as dev dependencies
-        yarn add prisma @prisma/client --dev
+        call yarn add prisma @prisma/client --dev
         if %ERRORLEVEL% NEQ 0 (
             echo.
             echo [Error] Failed to install Prisma packages. Please check the error messages.
@@ -264,7 +264,7 @@ if exist "node_modules\.bin\prisma.cmd" (
     )
 ) else (
     echo Prisma binary not found. Installing Prisma packages...
-    yarn add prisma @prisma/client --dev
+    call yarn add prisma @prisma/client --dev
     if %ERRORLEVEL% NEQ 0 (
         echo.
         echo [Error] Failed to install Prisma packages. Please check the error messages.
