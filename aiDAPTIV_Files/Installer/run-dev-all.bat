@@ -180,8 +180,6 @@ if %NEED_SETUP%==0 (
         echo.
         echo [Error] Failed to execute "yarn setup". Please check the error messages.
         echo.
-        pause
-        exit /b 1
     )
     
     echo.
