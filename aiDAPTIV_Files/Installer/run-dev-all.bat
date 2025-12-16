@@ -24,14 +24,35 @@ if errorlevel 1 (
         echo Using winget to install Node.js...
         call winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
         if not errorlevel 1 (
-            :: Verify Node.js is actually installed
-            call where node >nul 2>nul
-            if not errorlevel 1 (
+            :: Installation reported success, add common Node.js paths to PATH for current session
+            if exist "C:\Program Files\nodejs\node.exe" (
+                set "PATH=%PATH%;C:\Program Files\nodejs"
                 echo.
                 echo Node.js installed successfully via winget!
                 echo npm has been installed automatically with Node.js.
                 echo.
                 set NODE_INSTALLED=1
+            ) else if exist "%ProgramFiles(x86)%\nodejs\node.exe" (
+                set "PATH=%PATH%;%ProgramFiles(x86)%\nodejs"
+                echo.
+                echo Node.js installed successfully via winget!
+                echo npm has been installed automatically with Node.js.
+                echo.
+                set NODE_INSTALLED=1
+            ) else (
+                :: Installation succeeded but can't find node.exe, wait and refresh PATH from registry
+                timeout /t 2 /nobreak >nul 2>nul
+                for /f "tokens=2*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v PATH 2^>nul') do set "SYSTEM_PATH=%%B"
+                for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v PATH 2^>nul') do set "USER_PATH=%%B"
+                set "PATH=%SYSTEM_PATH%;%USER_PATH%"
+                call where node >nul 2>nul
+                if not errorlevel 1 (
+                    echo.
+                    echo Node.js installed successfully via winget!
+                    echo npm has been installed automatically with Node.js.
+                    echo.
+                    set NODE_INSTALLED=1
+                )
             )
         )
     )
@@ -43,14 +64,35 @@ if errorlevel 1 (
             echo Using Chocolatey to install Node.js...
             call choco install nodejs-lts -y
             if not errorlevel 1 (
-                :: Verify Node.js is actually installed
-                call where node >nul 2>nul
-                if not errorlevel 1 (
+                :: Installation reported success, add common Node.js paths to PATH for current session
+                if exist "C:\Program Files\nodejs\node.exe" (
+                    set "PATH=%PATH%;C:\Program Files\nodejs"
                     echo.
                     echo Node.js installed successfully via Chocolatey!
                     echo npm has been installed automatically with Node.js.
                     echo.
                     set NODE_INSTALLED=1
+                ) else if exist "%ProgramFiles(x86)%\nodejs\node.exe" (
+                    set "PATH=%PATH%;%ProgramFiles(x86)%\nodejs"
+                    echo.
+                    echo Node.js installed successfully via Chocolatey!
+                    echo npm has been installed automatically with Node.js.
+                    echo.
+                    set NODE_INSTALLED=1
+                ) else (
+                    :: Installation succeeded but can't find node.exe, wait and refresh PATH from registry
+                    timeout /t 2 /nobreak >nul 2>nul
+                    for /f "tokens=2*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v PATH 2^>nul') do set "SYSTEM_PATH=%%B"
+                    for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v PATH 2^>nul') do set "USER_PATH=%%B"
+                    set "PATH=%SYSTEM_PATH%;%USER_PATH%"
+                    call where node >nul 2>nul
+                    if not errorlevel 1 (
+                        echo.
+                        echo Node.js installed successfully via Chocolatey!
+                        echo npm has been installed automatically with Node.js.
+                        echo.
+                        set NODE_INSTALLED=1
+                    )
                 )
             )
         )
