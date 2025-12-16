@@ -16,55 +16,63 @@ if errorlevel 1 (
     echo Node.js is not installed, attempting to install Node.js ^(npm will be installed automatically^)...
     echo.
     
+    set NODE_INSTALLED=0
+    
     :: Try to install using winget (Windows Package Manager)
     call where winget >nul 2>nul
     if not errorlevel 1 (
         echo Using winget to install Node.js...
         call winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
         if not errorlevel 1 (
-            echo.
-            echo Node.js installed successfully via winget!
-            echo npm has been installed automatically with Node.js.
-            echo.
-        ) else (
-            echo.
-            echo [Warning] Failed to install Node.js via winget. Trying alternative method...
-            echo.
+            :: Verify Node.js is actually installed
+            call where node >nul 2>nul
+            if not errorlevel 1 (
+                echo.
+                echo Node.js installed successfully via winget!
+                echo npm has been installed automatically with Node.js.
+                echo.
+                set NODE_INSTALLED=1
+            )
         )
     )
     
-    :: Try to install using Chocolatey if available
-    call where choco >nul 2>nul
-    if not errorlevel 1 (
-        echo Using Chocolatey to install Node.js...
-        call choco install nodejs-lts -y
+    :: Only try Chocolatey if winget didn't succeed
+    if !NODE_INSTALLED!==0 (
+        call where choco >nul 2>nul
         if not errorlevel 1 (
-            echo.
-            echo Node.js installed successfully via Chocolatey!
-            echo npm has been installed automatically with Node.js.
-            echo.
-        ) else (
-            echo.
-            echo [Warning] Failed to install Node.js via Chocolatey.
-            echo.
+            echo Using Chocolatey to install Node.js...
+            call choco install nodejs-lts -y
+            if not errorlevel 1 (
+                :: Verify Node.js is actually installed
+                call where node >nul 2>nul
+                if not errorlevel 1 (
+                    echo.
+                    echo Node.js installed successfully via Chocolatey!
+                    echo npm has been installed automatically with Node.js.
+                    echo.
+                    set NODE_INSTALLED=1
+                )
+            )
         )
     )
     
     :: If both methods failed, provide manual installation instructions
-    echo.
-    echo [Error] Could not automatically install Node.js.
-    echo.
-    echo Please install Node.js manually ^(npm will be installed automatically with Node.js^):
-    echo 1. Download Node.js from: https://nodejs.org/
-    echo 2. Run the installer and follow the instructions
-    echo 3. Restart this batch file after installation
-    echo.
-    echo Alternatively, you can install a package manager:
-    echo - winget: Usually pre-installed on Windows 10/11
-    echo - Chocolatey: https://chocolatey.org/install
-    echo.
-    pause
-    exit /b 1
+    if !NODE_INSTALLED!==0 (
+        echo.
+        echo [Error] Could not automatically install Node.js.
+        echo.
+        echo Please install Node.js manually ^(npm will be installed automatically with Node.js^):
+        echo 1. Download Node.js from: https://nodejs.org/
+        echo 2. Run the installer and follow the instructions
+        echo 3. Restart this batch file after installation
+        echo.
+        echo Alternatively, you can install a package manager:
+        echo - winget: Usually pre-installed on Windows 10/11
+        echo - Chocolatey: https://chocolatey.org/install
+        echo.
+        pause
+        exit /b 1
+    )
 ) else (
     echo Node.js detected, checking version...
     for /f "delims=" %%v in ('node --version 2^>nul') do (
