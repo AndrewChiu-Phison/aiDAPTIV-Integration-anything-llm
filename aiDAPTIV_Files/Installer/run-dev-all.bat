@@ -54,6 +54,10 @@ if errorlevel 1 (
                     set NODE_INSTALLED=1
                 )
             )
+        ) else (
+            echo.
+            echo [Warning] Failed to install Node.js via winget. Trying alternative method...
+            echo.
         )
     )
     
@@ -94,7 +98,15 @@ if errorlevel 1 (
                         set NODE_INSTALLED=1
                     )
                 )
+            ) else (
+                echo.
+                echo [Warning] Failed to install Node.js via Chocolatey.
+                echo.
             )
+        ) else (
+            echo.
+            echo [Info] Chocolatey is not available. Skipping Chocolatey installation method.
+            echo.
         )
     )
     
@@ -102,6 +114,11 @@ if errorlevel 1 (
     if !NODE_INSTALLED!==0 (
         echo.
         echo [Error] Could not automatically install Node.js.
+        echo.
+        echo Installation attempts failed. This may be due to:
+        echo - Network connectivity issues ^(check your internet connection^)
+        echo - Package manager not available or not working properly
+        echo - Firewall or proxy settings blocking the download
         echo.
         echo Please install Node.js manually ^(npm will be installed automatically with Node.js^):
         echo 1. Download Node.js from: https://nodejs.org/
