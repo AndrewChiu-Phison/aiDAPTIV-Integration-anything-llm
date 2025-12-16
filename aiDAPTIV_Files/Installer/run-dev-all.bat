@@ -191,6 +191,28 @@ if errorlevel 1 (
         echo.
         pause
         exit /b 1
+    ) else (
+        rem Ensure current session can find yarn right after installation
+        set "NPM_PREFIX="
+        for /f "delims=" %%P in ('npm config get prefix 2^>nul') do set "NPM_PREFIX=%%P"
+        if not "!NPM_PREFIX!"=="" (
+            set "PATH=!PATH!;!NPM_PREFIX!;!NPM_PREFIX!\node_modules\.bin"
+        ) else (
+            rem Fallback to default global npm directory on Windows
+            if exist "%APPDATA%\npm\yarn.cmd" (
+                set "PATH=!PATH!;%APPDATA%\npm"
+            )
+        )
+        rem Verify yarn is now available
+        call where yarn >nul 2>nul
+        if errorlevel 1 (
+            echo.
+            echo [Error] yarn was installed but is not available on PATH in this session.
+            echo Please close this window, open a new terminal, and run this installer again.
+            echo.
+            pause
+            exit /b 1
+        )
     )
 ) else (
     echo yarn detected, skipping installation step.
