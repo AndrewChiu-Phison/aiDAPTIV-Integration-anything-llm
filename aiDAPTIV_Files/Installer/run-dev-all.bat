@@ -408,7 +408,26 @@ if !PRISMA_GEN_RESULT! NEQ 0 (
     set PRISMA_GEN_RETRY=%ERRORLEVEL%
     if !PRISMA_GEN_RETRY! NEQ 0 (
         echo.
-        echo [Error] \"yarn prisma:generate\" still failing after reinstall. Please check manually.
+        echo [Error] \"yarn prisma:generate\" still failing after reinstall.
+        echo.
+        echo   Common cause observed:
+        echo   - Prisma prints: Error: Cannot convert undefined or null to object
+        echo.
+        echo   If you see this message above, please try the following steps manually:
+        echo.
+        echo   1^) Make sure you are in the project root directory.
+        echo   2^) Delete any cached Prisma client folder if it exists:
+        echo      rmdir /s /q server\\node_modules\\.prisma
+        echo   3^) Re‑install Prisma packages inside server:
+        echo      cd server
+        echo      yarn remove @prisma/client prisma
+        echo      yarn add @prisma/client@5.3.1 prisma@5.3.1 --dev
+        echo      cd ..
+        echo   4^) Re‑run this installer batch file or run:
+        echo      yarn prisma:generate
+        echo.
+        echo   If the error still occurs after these steps, please contact your system administrator
+        echo   or the aiDAPTIV support team with a screenshot of the full error output.
         echo.
         pause
         exit /b 1
