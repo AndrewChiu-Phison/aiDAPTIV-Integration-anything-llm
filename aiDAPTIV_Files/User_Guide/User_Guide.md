@@ -4,43 +4,68 @@
 This application allows users to ask questions from the text user provided. This functionality achieves quick responses from the LLM, enhancing the overall user experience.
 
 ---
-## Chapter 1: Installation and Setting
+## 1: Installation and Setting
 
-### Installation Steps
+### Step 1: Clone the Repository
 
-```bash
+Open your terminal (PowerShell recommended) and clone the project:
+
+```powershell
 git clone <repository-url>
 cd aiDAPTIV-Integration-anything-llm
-npm install -g yarn
-yarn setup
 ```
 
-```bash
-yarn dev:all
-```
-
----
-
-## Chapter 2: How to Use?
-
-### Usage Workflow
+### Step 2: Run the Auto Installer
 
 1. **Initial Setup**
 - Click on `run-dev-all.bat` to launch the chat interface.(If occurs error, maybe try once again) The chat room can be found at http://localhost:3000 (default). 
-![image](img/fig_1.PNG)
 
-2. **Set LLM Endpoint**
+_Note: You may need to run PowerShell as Administrator if Node.js needs to be installed._
+
+This script will:
+1. Install Node.js
+2. Install npm
+3. Install yarn
+4. Install Prisma
+5. Install project dependencies
+6. Start the AnythingLLM server automatically.
+
+---
+
+## 2. Prerequisites
+
+Before installing, ensure your system meets the following requirements:
+
+- **OS**: Windows (PowerShell required for the installer script)
+- **Node.js**: (The installer will attempt to install it if missing)
+
+---
+
+## 3. Running the Application
+
+Once the installation is complete, you can start the application.
+The application can be found at http://localhost:3000 (default)
+
+1. **Set LLM Endpoint**
 - Fill in the **LLM Endpoint** and **Model Name** as required.
+![image](img/fig_1.PNG)
 ![image](img/fig_2.PNG)
 ![image](img/fig_3.PNG)
+For example: 
+    - Base URL: http://0.0.0.0:13141 (The endpoint you've created)
+    - API Key: EMPTY (The API Key to the endpoint)
+    - ChatModelName: C:\Users\K\Desktop\Llama-3.2-3B-Instruct-Q4_K_M.gguf (Path to model)
+    - Token context window: 4096
+    - Max Tokens: 1024
 
-3. **Set RAG**
+2. **Set RAG**
 - Upload the txt as a reference to the question.
 ![image](img/fig_4.PNG)
 ![image](img/fig_5.PNG)
 ![image](img/fig_6.PNG)
 ![image](img/fig_7.PNG)
 
-4. **Ask questions**
+3. **Ask questions**
 - Put "@agent" in the questions to enable the functionality of the RAG system. You can start asking questions about the txt you uploaded.
 ![image](img/fig_8.PNG)
+![image](img/fig_9.PNG)
