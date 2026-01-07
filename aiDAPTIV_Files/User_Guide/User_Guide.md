@@ -6,19 +6,14 @@ This application allows users to ask questions from the text user provided. This
 ---
 ## 1: Installation and Setting
 
-### Step 1: Clone the Repository
+### Step 1: Download the Repository
 
-Open your terminal (PowerShell recommended) and clone the project:
-
-```powershell
-git clone <repository-url>
-cd aiDAPTIV-Integration-anything-llm
-```
+Download from [here](https://github.com/aiDAPTIV-Phison/aiDAPTIV-Integration-anything-llm/archive/refs/tags/aiDAPTIV_v0.0.1.zip)
 
 ### Step 2: Run the Auto Installer
 
 1. **Initial Setup**
-- Click on `run-dev-all.bat` to launch the chat interface.(If occurs error, maybe try once again) The chat room can be found at http://localhost:3000 (default). 
+- Click on `./aiDAPTIV_Files/Installer/run-dev-all.bat` to launch the chat interface.(If occurs error, maybe try once again) The chat room can be found at http://localhost:3000 (default). 
 
 _Note: You may need to run PowerShell as Administrator if Node.js needs to be installed._
 
@@ -30,18 +25,10 @@ This script will:
 5. Install project dependencies
 6. Start the AnythingLLM server automatically.
 
----
-
-## 2. Prerequisites
-
-Before installing, ensure your system meets the following requirements:
-
-- **OS**: Windows (PowerShell required for the installer script)
-- **Node.js**: (The installer will attempt to install it if missing)
 
 ---
 
-## 3. Running the Application
+## 2. Running the Application
 
 Once the installation is complete, you can start the application.
 The application can be found at http://localhost:3000 (default)
@@ -68,4 +55,4 @@ For example:
 3. **Ask questions**
 - Put "@agent" in the questions to enable the functionality of the RAG system. You can start asking questions about the txt you uploaded.
 ![image](img/fig_8.PNG)
-![image](img/fig_9.PNG)
+![image](img/fig_9.png)
